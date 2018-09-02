@@ -22,24 +22,15 @@ public class ImageUtil {
     }
 
     public static Bitmap getLinearTransform(Bitmap bitmap) {
-        Bitmap result = bitmap.copy(bitmap.getConfig(),true);
+        Bitmap result = bitmap.copy(bitmap.getConfig(), true);
         int grayscale;
         int sum = bitmap.getWidth() * bitmap.getHeight();
         int[] color;
-        int[] count = new int[256];
+        int[] count = getCumulativeHistogram(bitmap);
         int[] lookup = new int[256];
 
-        for (int i = 0; i < bitmap.getWidth(); i++) {
-            for (int j = 0; j < bitmap.getHeight(); j++) {
-                color = getPixelColor(bitmap, i, j);
-                grayscale = (color[0] + color[1] + color[2]) / 3;
-                count[grayscale]++;
-            }
-        }
-
         for (int i = 1; i < 256; i++) {
-            count[i] = count[i] + count[i - 1];
-            lookup[i] = count[i] * 256 / sum;
+            lookup[i] = count[i] * 255 / sum;
         }
 
         for (int i = 0; i < bitmap.getWidth(); i++) {
@@ -53,6 +44,25 @@ public class ImageUtil {
         return result;
     }
 
+    public static int[] getCumulativeHistogram(Bitmap bitmap) {
+        int grayscale;
+        int[] color;
+        int[] count = new int[256];
+
+        for (int i = 0; i < bitmap.getWidth(); i++) {
+            for (int j = 0; j < bitmap.getHeight(); j++) {
+                color = getPixelColor(bitmap, i, j);
+                grayscale = (color[0] + color[1] + color[2]) / 3;
+                count[grayscale]++;
+            }
+        }
+
+        for (int i = 1; i < 256; i++) {
+            count[i] = count[i] + count[i - 1];
+        }
+
+        return count;
+    }
 
     private static int[] getPixelColor(Bitmap bitmap, int x, int y) {
         int pixel = bitmap.getPixel(x, y);

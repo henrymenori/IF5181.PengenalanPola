@@ -16,11 +16,16 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
+
 public class Activity1 extends AppCompatActivity {
 
     public final int LOAD_IMAGE_CODE = 1;
     public final int OPEN_CAMERA_CODE = 2;
 
+    GraphView graphView;
     ImageView imageViewOriginal, imageViewTransform;
 
     @Override
@@ -28,8 +33,11 @@ public class Activity1 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_1);
 
+        graphView = findViewById(R.id.graphView);
         imageViewOriginal = findViewById(R.id.imageViewOriginal);
         imageViewTransform = findViewById(R.id.imageViewTransform);
+
+        graphView.setTitle("Cumulative Histogram");
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, LOAD_IMAGE_CODE);
@@ -73,7 +81,24 @@ public class Activity1 extends AppCompatActivity {
     }
 
     public void transform(View view) {
-        Bitmap result = ImageUtil.getLinearTransform(((BitmapDrawable) imageViewOriginal.getDrawable()).getBitmap());
+        Bitmap original = ((BitmapDrawable) imageViewOriginal.getDrawable()).getBitmap();
+        Bitmap result = ImageUtil.getLinearTransform(original);
+
         imageViewTransform.setImageBitmap(result);
+        setGraphView(graphView, ImageUtil.getCumulativeHistogram(original));
+    }
+
+    private void setGraphView(GraphView graphView, int[] data) {
+        DataPoint[] dataPoints = new DataPoint[data.length];
+
+        for (int i = 0; i < data.length; i++) {
+            dataPoints[i] = new DataPoint(i, data[i]);
+        }
+
+        graphView.removeAllSeries();
+        graphView.addSeries(new BarGraphSeries(dataPoints));
+        graphView.getViewport().setXAxisBoundsManual(true);
+        graphView.getViewport().setMinX(0);
+        graphView.getViewport().setMaxX(data.length);
     }
 }
