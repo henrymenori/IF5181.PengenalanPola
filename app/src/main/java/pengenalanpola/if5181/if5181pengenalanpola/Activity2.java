@@ -14,32 +14,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.BarGraphSeries;
-import com.jjoe64.graphview.series.DataPoint;
 
-public class Activity1 extends AppCompatActivity {
+public class Activity2 extends AppCompatActivity {
 
-    ImageView imageView;
-    GraphView graphViewRed, graphViewGreen, graphViewBlue, graphViewGrayscale;
+    ImageView imageViewA, imageViewB, imageViewC, imageViewD;
+    SeekBar seekBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_1);
+        setContentView(R.layout.activity_2);
 
-        imageView = findViewById(R.id.imageView);
-        graphViewRed = findViewById(R.id.graphViewRed);
-        graphViewGreen = findViewById(R.id.graphViewGreen);
-        graphViewBlue = findViewById(R.id.graphViewBlue);
-        graphViewGrayscale = findViewById(R.id.graphViewGrayscale);
-
-        graphViewRed.setTitle("Red");
-        graphViewGreen.setTitle("Green");
-        graphViewBlue.setTitle("Blue");
-        graphViewGrayscale.setTitle("Grayscale");
+        imageViewA = findViewById(R.id.imageViewA);
+        imageViewB = findViewById(R.id.imageViewB);
+        imageViewC = findViewById(R.id.imageViewC);
+        imageViewD = findViewById(R.id.imageViewD);
+        seekBar = findViewById(R.id.seekBar);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constant.IntentCode.LOAD_IMAGE);
@@ -51,16 +45,28 @@ public class Activity1 extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         try {
             if (resultCode == RESULT_OK && data != null) {
-                if (requestCode == Constant.IntentCode.LOAD_IMAGE) {
+                if (requestCode == Constant.IntentCode.LOAD_IMAGE && data.getData() != null) {
                     Cursor cursor = getContentResolver().query(data.getData(), new String[]{MediaStore.Images.Media.DATA}, null, null, null);
+
+                    if (cursor == null)
+                        return;
+
                     cursor.moveToFirst();
                     String imageString = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
                     cursor.close();
-                    imageView.setImageBitmap(BitmapFactory.decodeFile(imageString));
-                } else if (requestCode == Constant.IntentCode.OPEN_CAMERA) {
-                    imageView.setImageBitmap((Bitmap) data.getExtras().get("data"));
+
+                    Bitmap image = BitmapFactory.decodeFile(imageString);
+
+                    imageViewA.setImageBitmap(image);
+                    imageViewC.setImageBitmap(ImageUtil.getGrayscaleImage(image));
+                } else if (requestCode == Constant.IntentCode.OPEN_CAMERA && data.getExtras().get("data") != null) {
+                    Bitmap image = (Bitmap) data.getExtras().get("data");
+
+                    imageViewA.setImageBitmap(image);
+                    imageViewC.setImageBitmap(ImageUtil.getGrayscaleImage(image));
                 }
             }
+
         } catch (Exception e) {
             Toast.makeText(this, String.format("Error : %s", e.getMessage()), Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -77,27 +83,11 @@ public class Activity1 extends AppCompatActivity {
         startActivityForResult(intent, Constant.IntentCode.OPEN_CAMERA);
     }
 
-    public void process(View view) {
-        Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-        int[][] count = ImageUtil.getPixelCount(bitmap);
+    public void transform(View view) {
+        Bitmap image = ((BitmapDrawable) imageViewA.getDrawable()).getBitmap();
+        Bitmap[] result = ImageUtil.getTransformedImage(image);
 
-        setGraphView(graphViewRed, count[0]);
-        setGraphView(graphViewGreen, count[1]);
-        setGraphView(graphViewBlue, count[2]);
-        setGraphView(graphViewGrayscale, count[3]);
-    }
-
-    public void setGraphView(GraphView graphView, int[] data) {
-        DataPoint[] dataPoints = new DataPoint[data.length];
-
-        for (int i = 0; i < data.length; i++) {
-            dataPoints[i] = new DataPoint(i, data[i]);
-        }
-
-        graphView.removeAllSeries();
-        graphView.addSeries(new BarGraphSeries(dataPoints));
-        graphView.getViewport().setXAxisBoundsManual(true);
-        graphView.getViewport().setMinX(0);
-        graphView.getViewport().setMaxX(data.length);
+        imageViewB.setImageBitmap(result[0]);
+        imageViewD.setImageBitmap(result[1]);
     }
 }
