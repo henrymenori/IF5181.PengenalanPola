@@ -15,28 +15,38 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jjoe64.graphview.GraphView;
-
-public class Activity2 extends AppCompatActivity {
+public class Activity3 extends AppCompatActivity {
 
     ImageView imageViewA, imageViewB, imageViewC, imageViewD;
-    SeekBar seekBar;
+    SeekBar seekBarA, seekBarB, seekBarC;
+    TextView textViewA, textViewB, textViewC;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_2);
+        setContentView(R.layout.activity_3);
 
         imageViewA = findViewById(R.id.imageViewA);
         imageViewB = findViewById(R.id.imageViewB);
         imageViewC = findViewById(R.id.imageViewC);
         imageViewD = findViewById(R.id.imageViewD);
+        seekBarA = findViewById(R.id.seekBarA);
+        seekBarB = findViewById(R.id.seekBarB);
+        seekBarC = findViewById(R.id.seekBarC);
+        textViewA = findViewById(R.id.textViewA);
+        textViewB = findViewById(R.id.textViewB);
+        textViewC = findViewById(R.id.textViewC);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constant.IntentCode.LOAD_IMAGE);
         }
+
+        initSeekBar(seekBarA, textViewA, 'A');
+        initSeekBar(seekBarB, textViewB, 'B');
+        initSeekBar(seekBarC, textViewC, 'C');
     }
 
     @Override
@@ -84,9 +94,41 @@ public class Activity2 extends AppCompatActivity {
 
     public void transform(View view) {
         Bitmap image = ((BitmapDrawable) imageViewA.getDrawable()).getBitmap();
-        Bitmap[] result = ImageUtil.getTransformedImage(image);
+        Bitmap[] result = ImageUtil.getTransformedImage(image, seekBarA.getProgress(), seekBarB.getProgress(), seekBarC.getProgress());
 
         imageViewB.setImageBitmap(result[0]);
         imageViewD.setImageBitmap(result[1]);
+    }
+
+    public void smoothing(View view) {
+        Bitmap image = ((BitmapDrawable) imageViewA.getDrawable()).getBitmap();
+        Bitmap[] result = ImageUtil.getSmoothingImage(image);
+
+        imageViewB.setImageBitmap(result[0]);
+        imageViewD.setImageBitmap(result[1]);
+    }
+
+    // private methods
+
+    private void initSeekBar(SeekBar seekBar, final TextView textView, final char c) {
+        seekBar.setMax(255);
+        seekBar.setProgress(127);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                textView.setText(String.format("%c : %d", c, progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        textView.setText(String.format("%c : %d", c, seekBar.getProgress()));
     }
 }

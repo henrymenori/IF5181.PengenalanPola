@@ -22,4 +22,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, Activity2.class);
         startActivity(intent);
     }
+
+    public void loadTugas03(View view) {
+        Intent intent = new Intent(MainActivity.this, Activity3.class);
+        startActivity(intent);
+    }
 }
