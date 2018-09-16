@@ -11,6 +11,25 @@ public class ImageUtil {
     public static final int BLUE = 2;
     public static final int GRAYSCALE = 3;
 
+    public static Bitmap getBinaryImage(Bitmap bitmap, int threshold) {
+        Bitmap result = bitmap.copy(bitmap.getConfig(), true);
+        int[] color;
+
+        for (int i = 0; i < bitmap.getWidth(); i++) {
+            for (int j = 0; j < bitmap.getHeight(); j++) {
+                color = getPixelColor(bitmap, i, j);
+
+                if (color[GRAYSCALE] < threshold) {
+                    setPixelColor(result, i, j, 0, 0, 0);
+                } else {
+                    setPixelColor(result, i, j, 255, 255, 255);
+                }
+            }
+        }
+
+        return result;
+    }
+
     public static Bitmap getGrayscaleImage(Bitmap bitmap) {
         Bitmap result = bitmap.copy(bitmap.getConfig(), true);
         int[] color;
@@ -121,6 +140,28 @@ public class ImageUtil {
         return new Bitmap[]{resultA, resultB};
     }
 
+    public static Bitmap detectNumber(Bitmap bitmap) {
+        //Bitmap result = bitmap.copy(bitmap.getConfig(), true);
+        int[] color;
+
+        for (int j = 0; j < bitmap.getHeight(); j++) {
+            for (int i = 0; i < bitmap.getWidth(); i++) {
+                color = getPixelColor(bitmap, i, j);
+
+                if (color[GRAYSCALE] == 0) {
+                    String chain = getChainCode(bitmap, i, j);
+                    Log.i("chain", chain);
+                    Log.i("num", "" + translate(chain));
+                    floodFill(bitmap, i, j);
+                }
+            }
+        }
+
+        Bitmap result = bitmap.copy(bitmap.getConfig(), true);
+
+        return result;
+    }
+
     public static int[][] getPixelCount(Bitmap bitmap) {
         int[] color;
         int[][] count = new int[4][256];
@@ -139,6 +180,44 @@ public class ImageUtil {
     }
 
     // private methods
+    private static int translate(String chain) {
+        double[][] ratio = {
+                {0.250, 0.075, 0.098, 0.075, 0.250, 0.075, 0.098, 0.075},
+                {0.329, 0.079, 0.074, 0.000, 0.361, 0.053, 0.095, 0.005},
+                {0.108, 0.161, 0.172, 0.044, 0.134, 0.112, 0.243, 0.022},
+                {0.143, 0.098, 0.158, 0.105, 0.132, 0.098, 0.169, 0.094},
+                {0.186, 0.146, 0.090, 0.005, 0.328, 0.005, 0.232, 0.005},
+                {0.161, 0.060, 0.218, 0.067, 0.147, 0.070, 0.211, 0.063},
+                {0.189, 0.086, 0.133, 0.103, 0.163, 0.086, 0.159, 0.077},
+                {0.211, 0.091, 0.201, 0.000, 0.201, 0.105, 0.183, 0.004},
+                {0.175, 0.095, 0.132, 0.101, 0.164, 0.101, 0.132, 0.095},
+                {0.168, 0.090, 0.147, 0.086, 0.181, 0.086, 0.142, 0.095}
+        };
+        double max = 0;
+        double[] sum = new double[8];
+        int number = 0;
+
+        for (int i = 0; i < chain.length(); i++) {
+            sum[Character.getNumericValue(chain.charAt(i))]++;
+        }
+
+        for (int i = 0; i < 8; i++) {
+            sum[i] = sum[i] / chain.length();
+        }
+
+        for (int i = 0; i < 10; i++) {
+            double res = 0;
+            for (int j = 0; j < 2; j++) {
+                res = res + ratio[i][j] * sum[j];
+            }
+            if (res > max) {
+                max = res;
+                number = i;
+            }
+        }
+
+        return number;
+    }
 
     private static int[] getPixelColor(Bitmap bitmap, int x, int y) {
         int pixel, red, green, blue, grayscale;
@@ -150,6 +229,53 @@ public class ImageUtil {
         grayscale = (red + green + blue) / 3;
 
         return new int[]{red, green, blue, grayscale};
+    }
+
+    private static int[] getNextPixel(Bitmap bitmap, int x, int y, int source) {
+        int a, b, target = source;
+        int[][] points = {{0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}};
+
+        do {
+            target = (target + 1) % 8;
+            a = x + points[target][0];
+            b = y + points[target][1];
+        }
+        while (getPixelColor(bitmap, a, b)[GRAYSCALE] == 255);
+
+        //Log.i("loc", String.format("%d %d %d", a, b, target));
+
+        return new int[]{a, b, target};
+    }
+
+    private static String getChainCode(Bitmap bitmap, int x, int y) {
+        int a = x;
+        int b = y;
+        int[] next;
+        int source = 6;
+        String chain = "";
+
+        do {
+            next = getNextPixel(bitmap, a, b, source);
+            a = next[0];
+            b = next[1];
+            source = (next[2] + 4) % 8;
+            chain = chain + next[2];
+        }
+        while (!(a == x && b == y));
+
+        return chain;
+    }
+
+    private static void floodFill(Bitmap bitmap, int x, int y) {
+        int[] color = getPixelColor(bitmap, x, y);
+
+        if (color[GRAYSCALE] != 255) {
+            setPixelColor(bitmap, x, y, 255, 255, 255);
+            floodFill(bitmap, x - 1, y);
+            floodFill(bitmap, x + 1, y);
+            floodFill(bitmap, x, y - 1);
+            floodFill(bitmap, x, y + 1);
+        }
     }
 
     private static void setPixelColor(Bitmap bitmap, int x, int y, int red, int green, int blue) {
