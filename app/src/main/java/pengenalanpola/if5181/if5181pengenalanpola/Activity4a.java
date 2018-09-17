@@ -17,19 +17,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Activity4 extends AppCompatActivity {
+public class Activity4a extends AppCompatActivity {
 
     ImageView imageView;
-    TextView textView, textViewA;
+    TextView textViewResult, textViewChainCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_4);
+        setContentView(R.layout.activity_4a);
 
         imageView = findViewById(R.id.imageView);
-        textView = findViewById(R.id.textView);
-        textViewA = findViewById(R.id.textViewA);
+        textViewResult = findViewById(R.id.textViewResult);
+        textViewChainCode = findViewById(R.id.textViewChainCode);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constant.IntentCode.LOAD_IMAGE);
@@ -75,12 +75,13 @@ public class Activity4 extends AppCompatActivity {
     public void openCamera(View view) {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(intent, Constant.IntentCode.OPEN_CAMERA);
-}
+    }
 
     public void process(View view) {
         Bitmap image = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-        String[] result = ImageUtil.detectNumber(image);
-        textView.setText(result[0]);
-        textViewA.setText(result[1]);
+        String[] result = ImageUtil.detectNumber2(image);
+
+        textViewResult.setText(result[0]);
+        textViewChainCode.setText(result[1]);
     }
 }

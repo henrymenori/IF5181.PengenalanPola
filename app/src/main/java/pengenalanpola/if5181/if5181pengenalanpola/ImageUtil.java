@@ -140,26 +140,56 @@ public class ImageUtil {
         return new Bitmap[]{resultA, resultB};
     }
 
-    public static Bitmap detectNumber(Bitmap bitmap) {
-        //Bitmap result = bitmap.copy(bitmap.getConfig(), true);
+    public static String[] detectNumber(Bitmap bitmap) {
+        Bitmap image = bitmap.copy(bitmap.getConfig(), true);
         int[] color;
+        String result = "";
+        String chains = "";
 
-        for (int j = 0; j < bitmap.getHeight(); j++) {
-            for (int i = 0; i < bitmap.getWidth(); i++) {
-                color = getPixelColor(bitmap, i, j);
+        for (int j = 0; j < image.getHeight(); j++) {
+            for (int i = 0; i < image.getWidth(); i++) {
+                color = getPixelColor(image, i, j);
 
                 if (color[GRAYSCALE] == 0) {
-                    String chain = getChainCode(bitmap, i, j);
+                    String chain = getChainCode(image, i, j);
+                    chains = chains + chain + "\n";
+                    result = result + translate(chain);
                     Log.i("chain", chain);
                     Log.i("num", "" + translate(chain));
-                    floodFill(bitmap, i, j);
+                    floodFill(image, i, j);
                 }
             }
         }
 
-        Bitmap result = bitmap.copy(bitmap.getConfig(), true);
+        //Bitmap result = bitmap.copy(bitmap.getConfig(), true);
 
-        return result;
+        return new String[] {result, chains};
+    }
+
+    public static String[] detectNumber2(Bitmap bitmap) {
+
+        int[] color;
+        String chain;
+
+        Bitmap image = bitmap.copy(bitmap.getConfig(), true);
+        StringBuilder result = new StringBuilder();
+        StringBuilder chains = new StringBuilder();
+
+        for (int j = 0; j < image.getHeight(); j++) {
+            for (int i = 0; i < image.getWidth(); i++) {
+                color = getPixelColor(image, i, j);
+
+                if (color[GRAYSCALE] == 0) {
+                    chain = getChainCode(image, i, j);
+                    chains.append(String.format("%s\n\n", chain));
+                    result.append(String.format("%d | ", ChainCodeUtil.translate(chain)));
+
+                    floodFill(image, i, j);
+                }
+            }
+        }
+
+        return new String[]{result.toString(), chains.toString()};
     }
 
     public static int[][] getPixelCount(Bitmap bitmap) {
@@ -180,6 +210,16 @@ public class ImageUtil {
     }
 
     // private methods
+    private static double getVectorLength(double[] vector) {
+        double sum = 0;
+
+        for (int i = 0; i < 8; i++) {
+            sum = sum + vector[i] * vector[i];
+        }
+
+        return Math.sqrt(sum);
+    }
+
     private static int translate(String chain) {
         double[][] ratio = {
                 {0.250, 0.075, 0.098, 0.075, 0.250, 0.075, 0.098, 0.075},
@@ -207,9 +247,10 @@ public class ImageUtil {
 
         for (int i = 0; i < 10; i++) {
             double res = 0;
-            for (int j = 0; j < 2; j++) {
+            for (int j = 0; j < 8; j++) {
                 res = res + ratio[i][j] * sum[j];
             }
+            res = res / getVectorLength(ratio[i]) / getVectorLength(sum);
             if (res > max) {
                 max = res;
                 number = i;
