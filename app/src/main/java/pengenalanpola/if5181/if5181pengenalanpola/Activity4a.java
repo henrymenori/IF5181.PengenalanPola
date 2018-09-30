@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import pengenalanpola.if5181.if5181pengenalanpola.util.NewImageUtil;
+
 public class Activity4a extends AppCompatActivity {
 
     ImageView imageView;
@@ -53,11 +55,11 @@ public class Activity4a extends AppCompatActivity {
 
                     Bitmap image = BitmapFactory.decodeFile(imageString);
 
-                    imageView.setImageBitmap(ImageUtil.getBinaryImage(image, 128));
+                    imageView.setImageBitmap(NewImageUtil.getBinaryImage(image, 128));
                 } else if (requestCode == Constant.IntentCode.OPEN_CAMERA && data.getExtras().get("data") != null) {
                     Bitmap image = (Bitmap) data.getExtras().get("data");
 
-                    imageView.setImageBitmap(ImageUtil.getBinaryImage(image, 128));
+                    imageView.setImageBitmap(NewImageUtil.getBinaryImage(image, 128));
                 }
             }
 

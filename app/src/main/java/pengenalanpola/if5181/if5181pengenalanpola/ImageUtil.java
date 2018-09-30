@@ -4,31 +4,17 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.util.Log;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
+import pengenalanpola.if5181.if5181pengenalanpola.util.SubImageUtil;
+
 public class ImageUtil {
 
     public static final int RED = 0;
     public static final int GREEN = 1;
     public static final int BLUE = 2;
     public static final int GRAYSCALE = 3;
-
-    public static Bitmap getBinaryImage(Bitmap bitmap, int threshold) {
-        Bitmap result = bitmap.copy(bitmap.getConfig(), true);
-        int[] color;
-
-        for (int i = 0; i < bitmap.getWidth(); i++) {
-            for (int j = 0; j < bitmap.getHeight(); j++) {
-                color = getPixelColor(bitmap, i, j);
-
-                if (color[GRAYSCALE] < threshold) {
-                    setPixelColor(result, i, j, 0, 0, 0);
-                } else {
-                    setPixelColor(result, i, j, 255, 255, 255);
-                }
-            }
-        }
-
-        return result;
-    }
 
     public static Bitmap getGrayscaleImage(Bitmap bitmap) {
         Bitmap result = bitmap.copy(bitmap.getConfig(), true);
@@ -210,6 +196,7 @@ public class ImageUtil {
     }
 
     // private methods
+
     private static double getVectorLength(double[] vector) {
         double sum = 0;
 
@@ -283,7 +270,7 @@ public class ImageUtil {
         }
         while (getPixelColor(bitmap, a, b)[GRAYSCALE] == 255);
 
-        //Log.i("loc", String.format("%d %d %d", a, b, target));
+        Log.i("loc", String.format("%d %d %d", a, b, target));
 
         return new int[]{a, b, target};
     }
@@ -293,30 +280,43 @@ public class ImageUtil {
         int b = y;
         int[] next;
         int source = 6;
-        String chain = "";
+        StringBuffer chain = new StringBuffer();
 
         do {
             next = getNextPixel(bitmap, a, b, source);
             a = next[0];
             b = next[1];
             source = (next[2] + 4) % 8;
-            chain = chain + next[2];
+            chain = chain.append(next[2]);
         }
         while (!(a == x && b == y));
 
-        return chain;
+        return chain.toString();
     }
 
     private static void floodFill(Bitmap bitmap, int x, int y) {
-        int[] color = getPixelColor(bitmap, x, y);
 
-        if (color[GRAYSCALE] != 255) {
-            setPixelColor(bitmap, x, y, 255, 255, 255);
-            floodFill(bitmap, x - 1, y);
-            floodFill(bitmap, x + 1, y);
-            floodFill(bitmap, x, y - 1);
-            floodFill(bitmap, x, y + 1);
+        Point current;
+        Queue<Point> queue = new LinkedList<>();
+        int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
+
+        bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+        queue.add(new Point(x, y));
+
+        while (!queue.isEmpty()) {
+            current = queue.poll();
+            int pixel = pixels[current.x + current.y * bitmap.getWidth()];
+            int grayscale = pixel & 0x000000ff;
+            if (grayscale != 255) {
+                pixels[current.x + current.y * bitmap.getWidth()] = pixel | 0x00ffffff;
+                queue.offer(new Point(current.x - 1, current.y));
+                queue.offer(new Point(current.x + 1, current.y));
+                queue.offer(new Point(current.x, current.y + 1));
+                queue.offer(new Point(current.x, current.y - 1));
+            }
         }
+
+        bitmap.setPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
     }
 
     private static void setPixelColor(Bitmap bitmap, int x, int y, int red, int green, int blue) {

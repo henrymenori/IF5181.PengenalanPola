@@ -14,24 +14,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import pengenalanpola.if5181.if5181pengenalanpola.util.NewImageUtil;
 
-public class Activity4 extends AppCompatActivity {
+public class Activity5 extends AppCompatActivity {
 
-    ImageView imageView;
-    TextView textView, textViewA;
+    ImageView imageView, imageViewA, imageViewB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_4);
+        setContentView(R.layout.activity_5);
 
         imageView = findViewById(R.id.imageView);
-        textView = findViewById(R.id.textView);
-        textViewA = findViewById(R.id.textViewA);
+        imageViewA = findViewById(R.id.imageViewA);
+        imageViewB = findViewById(R.id.imageViewB);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constant.IntentCode.LOAD_IMAGE);
@@ -77,12 +75,13 @@ public class Activity4 extends AppCompatActivity {
     public void openCamera(View view) {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(intent, Constant.IntentCode.OPEN_CAMERA);
-}
+    }
 
     public void process(View view) {
         Bitmap image = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-        String[] result = ImageUtil.detectNumber(image);
-        textView.setText(result[0]);
-        textViewA.setText(result[1]);
+        Bitmap[] result = NewImageUtil.getSkeleton(image);
+
+        imageViewA.setImageBitmap(result[0]);
+        imageViewB.setImageBitmap(result[1]);
     }
 }

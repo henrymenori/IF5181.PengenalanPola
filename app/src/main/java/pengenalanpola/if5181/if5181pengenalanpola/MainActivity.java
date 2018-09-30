@@ -37,4 +37,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, Activity4a.class);
         startActivity(intent);
     }
+
+    public void loadTugas05(View view) {
+        Intent intent = new Intent(MainActivity.this, Activity5.class);
+        startActivity(intent);
+    }
 }

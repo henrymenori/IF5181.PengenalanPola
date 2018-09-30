@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activity4a">
+    tools:context=".Activity5">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -34,20 +34,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:adjustViewBounds="true"
                 android:id="@+id/imageView"/>
-            <TextView
+            <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="40px"
-                android:layout_marginTop="20px"
-                android:textSize="80px"
-                android:id="@+id/textViewResult" />
-            <TextView
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:adjustViewBounds="true"
+                android:id="@+id/imageViewA"/>
+            <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="40px"
-                android:layout_marginTop="20px"
-                android:id="@+id/textViewChainCode" />
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:adjustViewBounds="true"
+                android:id="@+id/imageViewB"/>
         </LinearLayout>
     </ScrollView>
 

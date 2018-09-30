@@ -40,6 +40,12 @@
             android:text="Tugas 04 a"
             android:onClick="loadTugas04a"
             android:id="@+id/buttonTugas04a"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tugas 05"
+            android:onClick="loadTugas05"
+            android:id="@+id/buttonTugas05"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
