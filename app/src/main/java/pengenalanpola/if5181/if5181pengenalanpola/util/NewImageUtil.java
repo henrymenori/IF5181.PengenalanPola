@@ -1,6 +1,7 @@
 package pengenalanpola.if5181.if5181pengenalanpola.util;
 
 import android.graphics.Bitmap;
+import android.widget.TextView;
 
 public class NewImageUtil {
 
@@ -68,5 +69,39 @@ public class NewImageUtil {
                 Bitmap.createBitmap(pixelsa, width, height, bitmap.getConfig()),
                 Bitmap.createBitmap(pixelsb, width, height, bitmap.getConfig())
         };
+    }
+
+    public static Bitmap getSkeletonFeature(Bitmap bitmap, TextView textView) {
+        int count;
+        int[] border;
+
+        int height = bitmap.getHeight();
+        int width = bitmap.getWidth();
+        int size = height * width;
+        int[] pixels = new int[size];
+        int[] pixelsa = new int[size];
+        StringBuffer stringBuffer = new StringBuffer();
+
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+        bitmap.getPixels(pixelsa, 0, width, 0, 0, width, height);
+
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++) {
+                if ((pixels[i + j * width] & 0x000000ff) != 255) {
+                    border = SubImageUtil.floodFill(pixels, i, j, width);
+
+                    do {
+                        count = SubImageUtil.zhangSuenStep(pixelsa, border[0], border[1], border[2], border[3], width);
+                    }
+                    while (count != 0);
+
+                    stringBuffer.append(SubImageUtil.extractFeature(pixelsa, border[0], border[1], border[2], border[3], width));
+                }
+            }
+        }
+
+        textView.setText(stringBuffer);
+
+        return Bitmap.createBitmap(pixelsa, width, height, bitmap.getConfig());
     }
 }

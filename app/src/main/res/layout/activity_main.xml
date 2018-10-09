@@ -46,6 +46,12 @@
             android:text="Tugas 05"
             android:onClick="loadTugas05"
             android:id="@+id/buttonTugas05"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tugas 06"
+            android:onClick="loadTugas06"
+            android:id="@+id/buttonTugas06"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
