@@ -1,6 +1,7 @@
 package pengenalanpola.if5181.if5181pengenalanpola;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -12,10 +13,19 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 import pengenalanpola.if5181.if5181pengenalanpola.util.NewImageUtil;
 
@@ -34,6 +44,10 @@ public class Activity6 extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constant.IntentCode.LOAD_IMAGE);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
     }
 
@@ -59,6 +73,10 @@ public class Activity6 extends AppCompatActivity {
                     Bitmap image = (Bitmap) data.getExtras().get("data");
 
                     imageView.setImageBitmap(NewImageUtil.getBinaryImage(image, 128));
+                } else if (requestCode == 3) {
+                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("configmenori.txt", MODE_PRIVATE));
+                    outputStreamWriter.write("test");
+                    outputStreamWriter.close();
                 }
             }
 
@@ -80,8 +98,6 @@ public class Activity6 extends AppCompatActivity {
 
     public void process(View view) {
         Bitmap image = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-        Bitmap result = NewImageUtil.getSkeletonFeature(image, textView);
-
-        imageView.setImageBitmap(result);
+        NewImageUtil.getSkeletonFeature(image, textView);
     }
 }

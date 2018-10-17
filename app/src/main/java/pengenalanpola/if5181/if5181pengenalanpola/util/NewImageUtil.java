@@ -3,6 +3,8 @@ package pengenalanpola.if5181.if5181pengenalanpola.util;
 import android.graphics.Bitmap;
 import android.widget.TextView;
 
+import pengenalanpola.if5181.if5181pengenalanpola.model.SkeletonFeature;
+
 public class NewImageUtil {
 
     // -----------------------------
@@ -71,9 +73,9 @@ public class NewImageUtil {
         };
     }
 
-    public static Bitmap getSkeletonFeature(Bitmap bitmap, TextView textView) {
+    public static void getSkeletonFeature(Bitmap bitmap, TextView textView) {
         int count;
-        int[] border;
+        int[] border, border2;
 
         int height = bitmap.getHeight();
         int width = bitmap.getWidth();
@@ -95,13 +97,18 @@ public class NewImageUtil {
                     }
                     while (count != 0);
 
-                    stringBuffer.append(SubImageUtil.extractFeature(pixelsa, border[0], border[1], border[2], border[3], width));
+                    border2 = SubImageUtil.getNewBorder(pixelsa, border[0], border[1], border[2], border[3], width);
+                    SkeletonFeature sf = SubImageUtil.extractFeature(pixelsa, border2[0], border2[1], border2[2], border2[3], width);
+
+                    stringBuffer.append(String.format("%d,%b,%b,%b,%b,%b,%b,%b,%b,%b\r\n",
+                            sf.endpoints.size(),
+                            sf.hTop, sf.hMid, sf.hBottom,
+                            sf.vLeft, sf.vMid, sf.vRight,
+                            sf.lTop, sf.lMid, sf.lBottom));
                 }
             }
         }
 
         textView.setText(stringBuffer);
-
-        return Bitmap.createBitmap(pixelsa, width, height, bitmap.getConfig());
     }
 }
